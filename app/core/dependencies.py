@@ -8,6 +8,8 @@ from sqlalchemy import select
 from app.models.admin import Admin
 from app.core.database import get_db
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import logging
+logger = logging.getLogger("app")
 
 bearer_scheme = HTTPBearer()
 
@@ -17,10 +19,12 @@ async def get_current_admin(
     db: AsyncSession = Depends(get_db),
 ):
     token = credentials.credentials  # Extract token string
-
+    
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-
+        logger.info(
+            str(payload.get("exp"))            
+        )
         if payload.get("type") != "access":
             raise HTTPException(status_code=401, detail="Invalid token type")
 
